@@ -23,15 +23,12 @@
       overflow:hidden; /* 首屏不滚动，确认后解锁 */
       -webkit-tap-highlight-color: transparent;
     }
-    /* 顶部提示 */
     .hint{position:fixed;top:14px;left:50%;transform:translateX(-50%);font-size:12px;color:#d7dbff;opacity:.8;z-index:5}
 
-    /* 弹窗遮罩 */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter: blur(4px);display:flex;align-items:center;justify-content:center;z-index:10}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter: blur(4px);display:flex;align-items:center;justify-content:center;z-index:10;visibility:visible;opacity:1;transition:opacity .4s ease,visibility .4s ease}
+    .overlay.hide{opacity:0;visibility:hidden}
 
-    /* 弹窗卡片 */
     .modal{width:min(92vw, 520px);background:linear-gradient(180deg,#ffffff,#fff6f8);border-radius:20px;box-shadow:0 20px 60px rgba(255,59,92,.35);padding:22px 22px 18px;color:#333;position:relative}
-    .modal::after{content:"";position:absolute;inset:-2px;border-radius:22px;padding:2px;background:linear-gradient(135deg,var(--deep),#ff9fb0,#ffd1d8);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.7}
     .modal h1{margin:8px 0 6px;font-size:22px;color:#111;letter-spacing:.5px}
     .modal p{margin:6px 0 14px;line-height:1.6;color:#444}
 
@@ -43,30 +40,23 @@
 
     .modal .row{display:flex;gap:10px;flex-wrap:wrap}
 
-    /* 底部署名 */
     .credit{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-size:12px;color:#9fa8ff;opacity:.7;z-index:3}
 
-    /* 心形漂浮 */
     .heart{position:absolute;width:14px;height:14px;background:var(--pink);transform:rotate(45deg);border-radius:2px;box-shadow:0 0 12px rgba(255,107,129,.7)}
     .heart:before,.heart:after{content:"";position:absolute;width:14px;height:14px;background:var(--pink);border-radius:50%}
     .heart:before{left:-7px}
     .heart:after{top:-7px}
 
-    /* 樱花飘落 */
-    .petal{position:fixed;top:-10vh;left:0;width:12px;height:10px;background:radial-gradient(circle at 30% 30%,#fff,#ffd1da 40%,#ffa8b6 70%);border-radius:10px 10px 10px 10px/14px 14px 6px 6px;opacity:.9;filter:drop-shadow(0 0 6px rgba(255,107,129,.35));animation:fall linear forwards}
-    @keyframes fall{to{transform:translate(var(--dx),100vh) rotate(540deg)};}
+    .petal{position:fixed;top:-10vh;left:0;width:12px;height:10px;background:radial-gradient(circle at 30% 30%,#fff,#ffd1da 40%,#ffa8b6 70%);border-radius:10px;opacity:.9;filter:drop-shadow(0 0 6px rgba(255,107,129,.35));animation:fall linear forwards}
+    @keyframes fall{to{transform:translate(var(--dx),100vh) rotate(540deg)}}
 
-    /* 烟花画布 */
     canvas{position:fixed;inset:0;z-index:1}
 
-    /* 文案大标题 */
     .title{position:fixed;top:12vh;width:100%;text-align:center;font-size:clamp(24px,6vw,44px);font-weight:900;letter-spacing:2px;color:#fff;text-shadow:0 4px 24px rgba(255,59,92,.45)}
     .subtitle{position:fixed;top:calc(12vh + clamp(24px,6vw,44px) + 12px);width:100%;text-align:center;font-size:clamp(14px,3.5vw,18px);color:#ffe3e8;opacity:.9}
 
-    /* 二次按钮（再次绽放）*/
     .replay{position:fixed;bottom:24px;right:20px;z-index:3}
 
-    /* 初次隐藏动画层的可见内容 */
     .stage{opacity:0;transition:opacity .8s ease}
     .stage.show{opacity:1}
   </style>
@@ -74,30 +64,28 @@
 <body>
   <div class="hint">🔊 建议开启声音（若你后续自行加配乐） · 竖屏观感更佳</div>
 
-  <!-- 弹窗层 -->
   <div class="overlay" id="overlay">
     <div class="modal">
       <h1>收到一份<span style="color:var(--deep)">七夕礼物</span>，要打开吗？</h1>
       <p>专属小惊喜，只给你看（点“确定”即可）。</p>
       <div class="row">
-        <button class="btn btn-primary" id="confirm">确定</button>
-        <button class="btn btn-ghost" id="deny" aria-label="拒绝" title="拒绝">…还是先看看</button>
+        <button type="button" class="btn btn-primary" id="confirm">确定</button>
+        <button type="button" class="btn btn-ghost" id="deny" aria-label="拒绝" title="拒绝">…还是先看看</button>
       </div>
     </div>
   </div>
 
-  <!-- 动画舞台 -->
   <div class="stage" id="stage" aria-hidden="true">
     <h1 class="title">七夕快乐 ❤️</h1>
     <div class="subtitle">愿所有温柔都奔向你</div>
     <canvas id="fw"></canvas>
-    <button class="btn btn-primary replay" id="replay">再放一次烟花</button>
+    <button type="button" class="btn btn-primary replay" id="replay">再放一次烟花</button>
   </div>
 
   <div class="credit">© 给你的小朋友</div>
 
   <script>
-    // ======== 交互：确认弹窗 ========
+    document.addEventListener("DOMContentLoaded", function(){
     const overlay = document.getElementById('overlay');
     const stage = document.getElementById('stage');
     const confirmBtn = document.getElementById('confirm');
@@ -105,15 +93,14 @@
     const replayBtn = document.getElementById('replay');
 
     confirmBtn.addEventListener('click', () => {
-      overlay.style.display = 'none';
+      overlay.classList.add('hide');
       stage.classList.add('show');
       stage.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'auto'; // 解锁滚动
+      document.body.style.overflow = 'auto';
       launchShow();
       startPetals(20);
     });
 
-    // 温柔处理“拒绝”——按钮会移动（可选小趣味）
     let hop = 0;
     denyBtn.addEventListener('mouseenter', () => {
       hop++;
@@ -121,7 +108,6 @@
       denyBtn.style.transform = `translateX(${dx}px)`;
     });
 
-    // ======== 漂浮心心 ========
     function burstHearts(x,y,count=10){
       for(let i=0;i<count;i++){
         const h = document.createElement('div');
@@ -140,7 +126,6 @@
       }
     }
 
-    // ======== 樱花飘落 ========
     function startPetals(n=16){
       for(let i=0;i<n;i++) addPetal();
     }
@@ -160,7 +145,6 @@
       p.addEventListener('animationend',()=>{p.remove(); addPetal();});
     }
 
-    // ======== 简易烟花（Canvas） ========
     const canvas = document.getElementById('fw');
     const ctx = canvas.getContext('2d');
     let W,H,raf,ticks=0, fireworks=[];
@@ -197,20 +181,17 @@
       ctx.fillRect(0,0,W,H);
       ctx.globalCompositeOperation='lighter';
       fireworks = fireworks.filter(p=>p.step());
-      // 自动随机放
       ticks++;
       if(ticks%35===0) fire(Math.random()*W, H* (0.25 + Math.random()*0.45));
     }
 
     function launchShow(){
       cancelAnimationFrame(raf); fireworks=[]; ticks=0; step();
-      // 入场时来一波
       setTimeout(()=>fire(W*0.5,H*0.35), 400);
       setTimeout(()=>fire(W*0.3,H*0.4), 800);
       setTimeout(()=>fire(W*0.7,H*0.42), 1200);
     }
 
-    // 点击烟花 & 爱心
     canvas.addEventListener('click', (e)=>{
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left; const y = e.clientY - rect.top;
@@ -222,11 +203,11 @@
       burstHearts(window.innerWidth-40, window.innerHeight-40, 12);
     });
 
-    // 首屏也允许摸到爱心
     document.addEventListener('click',(e)=>{
       if(stage.classList.contains('show')) return;
       burstHearts(e.clientX, e.clientY, 6);
     }, {capture:true});
+      });
   </script>
 </body>
 </html>
