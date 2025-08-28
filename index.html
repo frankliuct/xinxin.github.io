@@ -56,6 +56,8 @@
     .subtitle{position:fixed;top:calc(12vh + clamp(24px,6vw,44px) + 36px);width:100%;text-align:center;font-size:clamp(14px,3.5vw,18px);color:#ffe3e8;opacity:.9}
 
     .replay{position:fixed;bottom:24px;right:20px;z-index:3}
+    .audio-btn{position:fixed;bottom:24px;left:20px;z-index:3}
+    .video-btn{position:fixed;bottom:24px;left:140px;z-index:3}
 
     .stage{opacity:0;transition:opacity .8s ease}
     .stage.show{opacity:1}
@@ -79,7 +81,22 @@
     <h1 class="title">七夕快乐 ❤️</h1>
     <div class="subtitle">愿所有温柔都奔向你</div>
     <canvas id="fw"></canvas>
+    <!-- 背景音乐（放在 stage 里，点击“确定”后播放） -->
+    <audio id="bgm" src="QiBackMusic.mp3" preload="auto" loop></audio>
+    <!-- 音乐开关 & 打开视频按钮 -->
+    <button type="button" class="btn btn-primary audio-btn" id="toggleAudio">音乐：开</button>
+    <button type="button" class="btn btn-ghost video-btn" id="openVideo">观看视频</button>
     <button type="button" class="btn btn-primary replay" id="replay">再放一次烟花</button>
+  </div>
+  <!-- 视频弹窗（可选） -->
+  <div class="overlay hide" id="videoOverlay" style="z-index:11;">
+    <div class="modal" style="max-width:min(92vw,720px)">
+      <h1 style="margin:8px 0 10px">七夕视频</h1>
+      <video id="qixiVideo" playsinline webkit-playsinline controls preload="metadata" src="QiBackVideo.mp4" style="width:100%;border-radius:12px"></video>
+      <div class="row" style="margin-top:12px">
+        <button type="button" class="btn btn-primary" id="closeVideo">关闭</button>
+      </div>
+    </div>
   </div>
 
   <div class="credit">© 给你的小朋友</div>
@@ -91,6 +108,44 @@
     const confirmBtn = document.getElementById('confirm');
     const denyBtn = document.getElementById('deny');
     const replayBtn = document.getElementById('replay');
+    const bgm = document.getElementById('bgm');
+    const toggleAudio = document.getElementById('toggleAudio');
+    const openVideo = document.getElementById('openVideo');
+    const closeVideo = document.getElementById('closeVideo');
+    const videoOverlay = document.getElementById('videoOverlay');
+    const qixiVideo = document.getElementById('qixiVideo');
+    let audioOn = true;
+    if(bgm) bgm.volume = 0.7;
+
+    // 背景音乐播放（在确认后尝试播放）
+    confirmBtn.addEventListener('click', async ()=>{
+      if(!bgm) return;
+      try{ await bgm.play(); }
+      catch(e){
+        const tip = document.querySelector('.hint');
+        if(tip) tip.textContent = '轻触屏幕任意位置以开始音乐~';
+        const tapOnce = ()=>{ bgm.play().catch(()=>{}); document.removeEventListener('touchstart', tapOnce); document.removeEventListener('click', tapOnce); };
+        document.addEventListener('touchstart', tapOnce, {once:true});
+        document.addEventListener('click', tapOnce, {once:true});
+      }
+    });
+
+    // 音乐开/关
+    if(toggleAudio){
+      toggleAudio.addEventListener('click', ()=>{
+        if(!bgm) return;
+        if(audioOn){ bgm.pause(); toggleAudio.textContent='音乐：关'; audioOn=false; }
+        else{ bgm.play().catch(()=>{}); toggleAudio.textContent='音乐：开'; audioOn=true; }
+      });
+    }
+
+    // 打开/关闭视频
+    if(openVideo && videoOverlay && qixiVideo){
+      openVideo.addEventListener('click', ()=>{ videoOverlay.classList.remove('hide'); qixiVideo.currentTime=0; qixiVideo.play().catch(()=>{}); });
+    }
+    if(closeVideo && videoOverlay && qixiVideo){
+      closeVideo.addEventListener('click', ()=>{ qixiVideo.pause(); videoOverlay.classList.add('hide'); });
+    }
 
     confirmBtn.addEventListener('click', () => {
       overlay.classList.add('hide');
