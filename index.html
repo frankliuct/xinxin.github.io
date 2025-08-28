@@ -53,7 +53,7 @@
     canvas{position:fixed;inset:0;z-index:1}
 
     .title{position:fixed;top:12vh;width:100%;text-align:center;font-size:clamp(24px,6vw,44px);font-weight:900;letter-spacing:2px;color:#fff;text-shadow:0 4px 24px rgba(255,59,92,.45)}
-    .subtitle{position:fixed;top:calc(12vh + clamp(24px,6vw,44px) + 12px);width:100%;text-align:center;font-size:clamp(14px,3.5vw,18px);color:#ffe3e8;opacity:.9}
+    .subtitle{position:fixed;top:calc(12vh + clamp(24px,6vw,44px) + 36px);width:100%;text-align:center;font-size:clamp(14px,3.5vw,18px);color:#ffe3e8;opacity:.9}
 
     .replay{position:fixed;bottom:24px;right:20px;z-index:3}
 
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <div class="hint">🔊 开启声音</div>
+  <div class="hint">🔊 建议开启声音（若你后续自行加配乐） · 竖屏观感更佳</div>
 
   <div class="overlay" id="overlay">
     <div class="modal">
@@ -77,8 +77,6 @@
 
   <div class="stage" id="stage" aria-hidden="true">
     <h1 class="title">七夕快乐 ❤️</h1>
-    <br>
-    <br>
     <div class="subtitle">愿所有温柔都奔向你</div>
     <canvas id="fw"></canvas>
     <button type="button" class="btn btn-primary replay" id="replay">再放一次烟花</button>
